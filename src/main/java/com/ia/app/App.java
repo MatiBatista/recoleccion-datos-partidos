@@ -39,6 +39,7 @@ public class App
         //countries.add(new Country(29,"Costa Rica"));
 
         int last=30;
+        String apiKey="0940599c5922c45c912714e9c3bd0780";
         for (Country country : countries) {
             String parametros = "last="+last+"&team=" + country.getId();
             try {
@@ -52,7 +53,7 @@ public class App
                 conexion.setRequestMethod("GET");
 
                 // Establecer encabezados
-                conexion.setRequestProperty("x-rapidapi-key", "2bb0ee70665da15f56f32f071a5bac80");
+                conexion.setRequestProperty("x-rapidapi-key", apiKey);
                 conexion.setRequestProperty("x-rapidapi-host", "v3.football.api-sports.io");
 
                 // Leer la respuesta
@@ -82,7 +83,7 @@ public class App
                         con.setRequestMethod("GET");
 
                         // Establecer encabezados
-                        con.setRequestProperty("x-rapidapi-key", "2bb0ee70665da15f56f32f071a5bac80");
+                        con.setRequestProperty("x-rapidapi-key",apiKey);
                         con.setRequestProperty("x-rapidapi-host", "v3.football.api-sports.io");
 
                         // Leer la respuesta
@@ -118,26 +119,48 @@ public class App
 
                         // Escribir datos en el archivo CSV
                         String resultado;
-                        if (Integer.parseInt(fixtureItem.getGoals().getHome()) > Integer.parseInt(fixtureItem.getGoals().getAway())) {
-                            resultado = "1";
-                        } else if (fixtureItem.getFixture().getStatus().getShortt().equals("PEN")) {
-                            String penaltysHome = fixtureItem.getScore().getPenalty().getHome();
-                            String penaltysAway = fixtureItem.getScore().getPenalty().getAway();
-                            if (penaltysHome != null && penaltysAway != null) {
+                        if(esLocal) {
+                            if (fixtureItem.getFixture().getStatus().getShortt().equals("FT")) {
 
-                                //Fijarse aca si el equipo del que estamos tratando es local o visitante
-                                if (Integer.parseInt(penaltysHome) > Integer.parseInt(penaltysAway)) {
+                                if (Integer.parseInt(fixtureItem.getGoals().getHome()) > Integer.parseInt(fixtureItem.getGoals().getAway())) {
+                                    resultado = "1";
+                                } else if (Integer.parseInt(fixtureItem.getGoals().getHome()) == Integer.parseInt(fixtureItem.getGoals().getAway())) {
+                                    resultado = "0.5";
+                                } else {
+                                    resultado = "0";
+                                }
+                            }else{
+                                int penaltysHome = Integer.parseInt(fixtureItem.getScore().getPenalty().getHome());
+                                int penaltysAway = Integer.parseInt(fixtureItem.getScore().getPenalty().getAway());
+
+                                if (penaltysHome > penaltysAway) {
                                     resultado = "1";
                                 } else {
                                     resultado = "0";
                                 }
-                            } else {
-                                resultado = "0.5";
                             }
-                        } else {
-                            resultado = "0";
-                        }
+                        }else {
 
+                            if (fixtureItem.getFixture().getStatus().getShortt().equals("FT")) {
+
+                                if (Integer.parseInt(fixtureItem.getGoals().getAway()) > Integer.parseInt(fixtureItem.getGoals().getHome())) {
+                                    resultado = "1";
+                                } else if (Integer.parseInt(fixtureItem.getGoals().getAway()) == Integer.parseInt(fixtureItem.getGoals().getHome())) {
+                                    resultado = "0.5";
+                                } else {
+                                    resultado = "0";
+                                }
+                            } else {
+                                int penaltysHome = Integer.parseInt(fixtureItem.getScore().getPenalty().getHome());
+                                int penaltysAway = Integer.parseInt(fixtureItem.getScore().getPenalty().getAway());
+
+                                if (penaltysHome < penaltysAway) {
+                                    resultado = "1";
+                                } else {
+                                    resultado = "0";
+                                }
+                            }
+                        }
                         String nameLeague = fixtureItem.getLeague().getName();
                         String importanciaLiga = "";
                         String round = fixtureItem.getLeague().getRound();
